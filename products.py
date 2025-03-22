@@ -1,4 +1,7 @@
 class Product:
+    """Represents a product with a name, price, quantity, and active status."""
+
+
     def __init__(self, name, price, quantity):
         """ Initiator (constructor) method. 
             Creates the instance variables. 
@@ -22,13 +25,16 @@ class Product:
         if self.quantity == 0:
             self.deactivate()
 
+
     def is_active(self) -> bool:
         """ Getter function for active. Returns True if the product is active, otherwise False. """
         return self.active
 
+
     def activate(self):
         """ Activates the product. """
         self.active = True
+
 
     def deactivate(self):
         """ Deactivates the product. """

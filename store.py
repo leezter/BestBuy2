@@ -1,4 +1,7 @@
 class Store:
+    """ A class representing a store that holds and manages multiple Product instances."""
+
+
     def __init__(self, products):
         """ Initialise the store with a list of products. """
         self.products = products
