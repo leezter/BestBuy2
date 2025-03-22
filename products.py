@@ -1,9 +1,8 @@
-
-
 class Product:
     def __init__(self, name, price, quantity):
-        """ Initiator (constructor) method. Creates the instance variables. 
-        If something is invalid (empty name / negative price or quantity), raises an exception. """
+        """ Initiator (constructor) method. 
+            Creates the instance variables. 
+            If something is invalid (empty name / negative price or quantity), raises an exception. """
         if not name or price < 0 or quantity < 0:
             raise Exception("Error with your choice! Try again!")
         self.name = name
@@ -43,7 +42,7 @@ class Product:
 
     def buy(self, quantity) -> float:
         """ Buys a given quantity of the product.
-        Returns the total price (float) of the purchase.
+        Returns the total price of the purchase.
         Updates the quantity of the product.
         In case of a problem, raises an Exception. """
         if not self.active:
@@ -56,23 +55,3 @@ class Product:
         if self.quantity == 0:
             self.deactivate()
         return self.price * quantity
-
-
-
-def main():
-    bose = Product("Bose QuietComfort Earbuds", price=250, quantity=500)
-    mac = Product("MacBook Air M2", price=1450, quantity=100)
-
-    print(bose.buy(50))
-    print(mac.buy(100))
-    print(mac.is_active())
-
-    print(bose.show())
-    print(mac.show())
-
-    bose.set_quantity(1000)
-    print(bose.show())
-
-
-if __name__  == "__main__":
-    main()
