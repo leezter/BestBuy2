@@ -1,5 +1,5 @@
 import pytest
-from products import Product, NonStockedProduct, LimitedProduct
+from products import Product, NonStockedProduct, LimitedProduct, Promotion, PercentageDiscount, SecondHalfPrice, Buy2Get1Free
 from store import Store
 
 def test_create_normal_product():
@@ -55,7 +55,7 @@ def test_non_stocked_product():
     """Test non-stocked product behavior."""
     digital = NonStockedProduct("Windows License", price=125)
     assert digital.quantity == 0
-    assert "(Digital Product)" in digital.show()
+    assert "Quantity: Unlimited" in digital.show()
     
     # Should be able to buy any quantity
     total = digital.buy(5)
@@ -65,7 +65,7 @@ def test_non_stocked_product():
 def test_limited_product():
     """Test limited product behavior."""
     limited = LimitedProduct("Shipping", price=10, quantity=250, maximum=1)
-    assert "(Maximum per order: 1)" in limited.show()
+    assert "Limited to 1 per order!" in limited.show()
     
     # Should be able to buy within limit
     total = limited.buy(1)
@@ -87,4 +87,63 @@ def test_store_with_all_products():
     ]
     
     store = Store(product_list)
-    assert len(store.products) == 5 
+    assert len(store.products) == 5
+
+def test_promotions():
+    """Test all promotion types."""
+    # Create products
+    product_list = [
+        Product("MacBook Air M2", price=1450, quantity=100),
+        Product("Bose QuietComfort Earbuds", price=250, quantity=500),
+        Product("Google Pixel 7", price=500, quantity=250),
+        NonStockedProduct("Windows License", price=125),
+        LimitedProduct("Shipping", price=10, quantity=250, maximum=1)
+    ]
+
+    # Create promotions
+    second_half_price = SecondHalfPrice("Second Half price!")
+    third_one_free = Buy2Get1Free("Third One Free!")
+    thirty_percent = PercentageDiscount("30% off!", 30)
+
+    # Test second half price promotion
+    product_list[0].set_promotion(second_half_price)
+    assert product_list[0].get_promotion().name == "Second Half price!"
+    # Buy 2 items: 1450 + 725 = 2175
+    assert product_list[0].buy(2) == 2175
+    # Buy 3 items: 1450 + 725 + 1450 = 3625
+    assert product_list[0].buy(3) == 3625
+
+    # Test buy 2 get 1 free promotion
+    product_list[1].set_promotion(third_one_free)
+    assert product_list[1].get_promotion().name == "Third One Free!"
+    # Buy 3 items: pay for 2 = 500
+    assert product_list[1].buy(3) == 500
+    # Buy 4 items: pay for 3 = 750
+    assert product_list[1].buy(4) == 750
+
+    # Test percentage discount promotion
+    product_list[3].set_promotion(thirty_percent)
+    assert product_list[3].get_promotion().name == "30% off!"
+    # Buy 2 items with 30% off: 250 * 0.7 = 175
+    assert product_list[3].buy(2) == 175
+
+    # Test promotion display in show method
+    assert "Promotion: Second Half price!" in product_list[0].show()
+    assert "Promotion: Third One Free!" in product_list[1].show()
+    assert "Promotion: 30% off!" in product_list[3].show()
+
+def test_promotion_removal():
+    """Test removing promotions from products."""
+    product = Product("MacBook Air M2", price=1450, quantity=100)
+    promotion = PercentageDiscount("20% off", 20)
+    
+    # Add promotion
+    product.set_promotion(promotion)
+    assert product.get_promotion() is not None
+    
+    # Remove promotion
+    product.set_promotion(None)
+    assert product.get_promotion() is None
+    
+    # Verify price calculation without promotion
+    assert product.buy(2) == 2900  # 2 * 1450 

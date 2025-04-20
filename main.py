@@ -1,4 +1,4 @@
-from products import Product
+from products import Product, NonStockedProduct, LimitedProduct, SecondHalfPrice, Buy2Get1Free, PercentageDiscount
 from store import Store
 
 
@@ -60,9 +60,12 @@ def start(store):
                     quantity = int(quantity_str)
 
                     product = active_products[product_index]
-                    if quantity <= 0 or quantity > product.get_quantity():
-                        print("Error while making order! Quantity larger than what exists")
-                        continue
+                    
+                    # Skip quantity check for non-stocked products
+                    if not isinstance(product, NonStockedProduct):
+                        if quantity <= 0 or quantity > product.get_quantity():
+                            print("Error while making order! Quantity larger than what exists")
+                            continue
 
                     order_list.append((product, quantity))
                     print("Product added to list!")
@@ -86,11 +89,25 @@ def start(store):
 
 def main():
     """ setup initial stock of inventory. """
-    product_list = [ 
+    # Create products
+    product_list = [
         Product("MacBook Air M2", price=1450, quantity=100),
         Product("Bose QuietComfort Earbuds", price=250, quantity=500),
-        Product("Google Pixel 7", price=500, quantity=250)
+        Product("Google Pixel 7", price=500, quantity=250),
+        NonStockedProduct("Windows License", price=125),
+        LimitedProduct("Shipping", price=10, quantity=250, maximum=1)
     ]
+
+    # Create promotions
+    second_half_price = SecondHalfPrice("Second Half price!")
+    third_one_free = Buy2Get1Free("Third One Free!")
+    thirty_percent = PercentageDiscount("30% off!", 30)
+
+    # Add promotions to products
+    product_list[0].set_promotion(second_half_price)
+    product_list[1].set_promotion(third_one_free)
+    product_list[3].set_promotion(thirty_percent)
+
     best_buy = Store(product_list)
     start(best_buy)
 
