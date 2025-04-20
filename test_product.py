@@ -1,5 +1,6 @@
 import pytest
-from products import Product
+from products import Product, NonStockedProduct, LimitedProduct
+from store import Store
 
 def test_create_normal_product():
     """Test that creating a normal product works."""
@@ -48,4 +49,42 @@ def test_buy_larger_quantity():
     product = Product("MacBook Air M2", price=1450, quantity=100)
     
     with pytest.raises(Exception):
-        product.buy(101)  # Try to buy more than available 
+        product.buy(101)  # Try to buy more than available
+
+def test_non_stocked_product():
+    """Test non-stocked product behavior."""
+    digital = NonStockedProduct("Windows License", price=125)
+    assert digital.quantity == 0
+    assert "(Digital Product)" in digital.show()
+    
+    # Should be able to buy any quantity
+    total = digital.buy(5)
+    assert total == 625
+    assert digital.quantity == 0
+
+def test_limited_product():
+    """Test limited product behavior."""
+    limited = LimitedProduct("Shipping", price=10, quantity=250, maximum=1)
+    assert "(Maximum per order: 1)" in limited.show()
+    
+    # Should be able to buy within limit
+    total = limited.buy(1)
+    assert total == 10
+    assert limited.quantity == 249
+    
+    # Should not be able to buy more than maximum
+    with pytest.raises(Exception):
+        limited.buy(2)
+
+def test_store_with_all_products():
+    """Test store initialization with all product types."""
+    product_list = [
+        Product("MacBook Air M2", price=1450, quantity=100),
+        Product("Bose QuietComfort Earbuds", price=250, quantity=500),
+        Product("Google Pixel 7", price=500, quantity=250),
+        NonStockedProduct("Windows License", price=125),
+        LimitedProduct("Shipping", price=10, quantity=250, maximum=1)
+    ]
+    
+    store = Store(product_list)
+    assert len(store.products) == 5 

@@ -61,3 +61,46 @@ class Product:
         if self.quantity == 0:
             self.deactivate()
         return self.price * quantity
+
+
+class NonStockedProduct(Product):
+    """Represents a product that doesn't have physical stock (e.g., software licenses)."""
+    
+    def __init__(self, name, price):
+        """Initialize a non-stocked product with quantity always set to 0."""
+        super().__init__(name, price, quantity=0)
+    
+    def set_quantity(self, quantity):
+        """Override to prevent quantity changes."""
+        pass
+    
+    def buy(self, quantity) -> float:
+        """Override to allow purchase without quantity checks."""
+        if not self.active:
+            raise Exception("Product not active")
+        if quantity <= 0:
+            raise Exception("Quantity must be greater than 0")
+        return self.price * quantity
+    
+    def show(self) -> str:
+        """Override to show that this is a non-stocked product."""
+        return f"{self.name}, Price: {self.price} (Digital Product)"
+
+
+class LimitedProduct(Product):
+    """Represents a product that can only be purchased a limited number of times per order."""
+    
+    def __init__(self, name, price, quantity, maximum):
+        """Initialize a limited product with a maximum purchase quantity per order."""
+        super().__init__(name, price, quantity)
+        self.maximum = maximum
+    
+    def buy(self, quantity) -> float:
+        """Override to enforce maximum purchase limit."""
+        if quantity > self.maximum:
+            raise Exception(f"Cannot purchase more than {self.maximum} of this product in a single order")
+        return super().buy(quantity)
+    
+    def show(self) -> str:
+        """Override to show the maximum purchase limit."""
+        return f"{super().show()} (Maximum per order: {self.maximum})"
